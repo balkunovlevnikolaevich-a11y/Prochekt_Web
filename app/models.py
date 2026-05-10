@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 class UserRole(enum.Enum):
     CUSTOMER = "Заказчик"
     EXECUTOR = "Исполнитель"
+    ADMIN = "Администратор"   # ← новая роль
 
 
 class User(db.Model, UserMixin):
@@ -32,6 +33,7 @@ class TaskStatus(enum.Enum):
     TAKEN = "Принята"
     COMPLETED = "Выполнена"
     VERIFIED = "Подтверждена"
+    CANCELLED = "Отменена"   # ← новая
 
 
 class Task(db.Model):
@@ -43,13 +45,9 @@ class Task(db.Model):
     status = db.Column(db.Enum(TaskStatus), default=TaskStatus.OPEN)
     customer_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     executor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
-    
-    # Изменено: теперь храним только имя файла, а не путь
     file_name = db.Column(db.String(300), nullable=True)
-    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    # Связь с сообщениями чата
     messages = db.relationship('Message', backref='task', lazy=True, cascade="all, delete-orphan")
 
 
@@ -58,13 +56,7 @@ class Message(db.Model):
     task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
     sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     text = db.Column(db.Text, nullable=True)
-    
-    # Изменено: теперь храним только имя файла
     file_name = db.Column(db.String(300), nullable=True)
-    
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
-
-    def __repr__(self):
-        return f'<Message {self.id}>'
