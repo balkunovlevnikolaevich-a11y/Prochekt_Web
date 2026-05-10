@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2>✏️ Редактирование рекламы</h2>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="mb-3">
+                <label class="form-label">Заголовок рекламы</label>
+                <input type="text" name="title" class="form-control" value="{{ ad.title }}" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Текст рекламы</label>
+                <textarea name="content" class="form-control" rows="3" required>{{ ad.content }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Номер телефона</label>
+                <input type="tel" name="phone" class="form-control" value="{{ ad.phone }}" required>
+            </div>
+            <button type="submit" class="btn btn-success">Сохранить изменения</button>
+            <a href="{{ url_for('tasks.admin_panel') }}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
