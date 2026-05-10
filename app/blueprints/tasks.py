@@ -70,7 +70,8 @@ def take_task(task_id):
     # Отладка
     print(f"DEBUG: Задача {task.id} | Статус: {task.status} | Исполнитель: {task.executor_id}")
 
-    if task.status != TaskStatus.OPEN:
+    # Используем .value — это надёжнее в blueprints
+    if task.status.value != "Открыта":
         flash('Задача уже занята или завершена', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
 
@@ -78,7 +79,7 @@ def take_task(task_id):
         flash('Вы не можете взять свою собственную задачу', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
 
-    # Основное действие
+    # Берём задачу
     task.status = TaskStatus.TAKEN
     task.executor_id = current_user.id
     db.session.commit()
