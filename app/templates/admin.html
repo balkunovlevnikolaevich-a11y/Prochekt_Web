@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h2 class="mb-4">👑 Админ-панель</h2>
+
+<div class="card">
+    <div class="card-header">
+        <h5>Все задачи (проблемные выделены)</h5>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Заголовок</th>
+                    <th>Статус</th>
+                    <th>Заказчик</th>
+                    <th>Исполнитель</th>
+                    <th>Награда</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr {% if 'Обращение в поддержку' in task.messages|map(attribute='text')|join(' ') %}class="table-warning"{% endif %}>
+                    <td><strong>#{{ task.id }}</strong></td>
+                    <td>{{ task.title }}</td>
+                    <td><span class="badge bg-{{ 'success' if task.status.value == 'Подтверждена' else 'warning' if task.status.value == 'Принята' else 'danger' if task.status.value == 'Отменена' else 'primary' }}">{{ task.status.value }}</span></td>
+                    <td>{{ task.customer.username }}</td>
+                    <td>{{ task.executor.username if task.executor else '—' }}</td>
+                    <td>{{ task.reward }} ₽</td>
+                    <td>
+                        <a href="{{ url_for('tasks.task_detail', task_id=task.id) }}" class="btn btn-sm btn-primary">Открыть</a>
+                        {% if task.status != TaskStatus.CANCELLED %}
+                        <a href="{{ url_for('tasks.cancel_task', task_id=task.id) }}" 
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Отменить задачу №{{ task.id }} и вернуть деньги?')">
+                            ❌ Отменить
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
