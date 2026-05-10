@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ task.title }}</h2>
+<p><strong>Статус:</strong> {{ task.status.value }}</p>
+<p><strong>Награда:</strong> {{ task.reward }} ₽</p>
+<p><strong>Заказчик:</strong> {{ task.customer.username }}</p>
+{% if task.executor %}<p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>{% endif %}
+
+<div class="mt-4">
+    <h5>Описание:</h5>
+    <p style="white-space: pre-wrap;">{{ task.description }}</p>
+</div>
+
+{% if task.file_path %}
+<p><a href="/{{ task.file_path }}" target="_blank">Скачать прикреплённый файл</a></p>
+{% endif %}
+
+<div class="mt-4">
+    {% if current_user.role.value == 'Исполнитель' and task.status.value == 'Открыта' %}
+        <a href="{{ url_for('tasks.take_task', task_id=task.id) }}" class="btn btn-success">Взять задачу</a>
+    {% endif %}
+    {% if task.executor_id == current_user.id and task.status.value == 'Принята' %}
+        <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning">Отметить как выполненную</a>
+    {% endif %}
+</div>
+{% endblock %}
