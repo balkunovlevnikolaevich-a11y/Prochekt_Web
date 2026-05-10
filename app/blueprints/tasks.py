@@ -168,29 +168,7 @@ def cancel_task(task_id):
     db.session.commit()
     flash('Задача отменена. Деньги возвращены заказчику.', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
-# Редактирование рекламы (только админ)
-@tasks_bp.route('/admin/ad/edit', methods=['GET', 'POST'])
-@login_required
-def edit_ad():
-    if current_user.role != UserRole.ADMIN:
-        flash('Доступ запрещён', 'danger')
-        return redirect(url_for('main.dashboard'))
 
-    ad = Advertisement.query.first()
-    if not ad:
-        ad = Advertisement(title="Реклама", content="Здесь может быть ваша реклама", phone="+79111453106")
-        db.session.add(ad)
-        db.session.commit()
-
-    if request.method == 'POST':
-        ad.title = request.form.get('title')
-        ad.content = request.form.get('content')
-        ad.phone = request.form.get('phone')
-        db.session.commit()
-        flash('Реклама успешно обновлена!', 'success')
-        return redirect(url_for('tasks.admin_panel'))
-
-    return render_template('edit_ad.html', ad=ad)
 # ====================== РЕДАКТИРОВАНИЕ РЕКЛАМЫ ======================
 @tasks_bp.route('/admin/ad/edit', methods=['GET', 'POST'])
 @login_required
