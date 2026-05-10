@@ -9,7 +9,7 @@
 <p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>
 {% endif %}
 
-<!-- ЧАТ -->
+<!-- === ЧАТ === -->
 <div class="card mt-4">
     <div class="card-header">
         <h5>💬 Чат по задаче</h5>
@@ -34,12 +34,19 @@
         {% endfor %}
     </div>
 
+    <!-- Исправленная форма без наслоения -->
     <div class="card-footer p-3">
         <form method="POST" action="{{ url_for('tasks.send_message', task_id=task.id) }}" enctype="multipart/form-data">
-            <div class="input-group">
-                <input type="text" name="text" class="form-control" placeholder="Напишите сообщение..." autocomplete="off">
-                <input type="file" name="file" class="form-control" style="max-width: 160px;">
-                <button type="submit" class="btn btn-primary">Отправить</button>
+            <div class="row g-2">
+                <div class="col-12 col-md-7">
+                    <input type="text" name="text" class="form-control" placeholder="Напишите сообщение..." autocomplete="off">
+                </div>
+                <div class="col-12 col-md-3">
+                    <input type="file" name="file" class="form-control">
+                </div>
+                <div class="col-12 col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">Отправить</button>
+                </div>
             </div>
         </form>
     </div>
