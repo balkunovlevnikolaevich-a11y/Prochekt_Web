@@ -60,3 +60,13 @@ class Message(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
+class Advertisement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False, default="Реклама")
+    content = db.Column(db.Text, nullable=False, default="Место для вашей рекламы")
+    phone = db.Column(db.String(20), nullable=False, default="+79111453106")
+    active = db.Column(db.Boolean, default=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Advertisement {self.title}>'
