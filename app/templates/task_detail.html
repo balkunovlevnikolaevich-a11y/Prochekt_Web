@@ -5,37 +5,55 @@
 
 <p><strong>Статус:</strong> {{ task.status.value }}</p>
 <p><strong>Награда:</strong> {{ task.reward }} ₽</p>
-
-<p><strong>Заказчик:</strong> 
-    {% if task.customer %}{{ task.customer.username }}{% else %}Неизвестно{% endif %}
-</p>
-
+<p><strong>Заказчик:</strong> {{ task.customer.username if task.customer else 'Неизвестно' }}</p>
 {% if task.executor %}
 <p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>
 {% endif %}
 
-<div class="mt-4">
-    <h5>Описание:</h5>
-    <p style="white-space: pre-wrap;">{{ task.description }}</p>
+<!-- === ЧАТ === -->
+<div class="card mt-4">
+    <div class="card-header">
+        <h5>💬 Чат по задаче</h5>
+    </div>
+    <div class="card-body" style="max-height: 450px; overflow-y: auto; background: #f8f9fa;" id="chat-box">
+        {% for msg in messages %}
+        <div class="mb-3 p-2 rounded {% if msg.sender_id == current_user.id %}bg-primary text-white ms-auto{% else %}bg-light{% endif %}" style="max-width: 75%;">
+            <small class="text-muted {% if msg.sender_id == current_user.id %}text-light{% endif %}">
+                <strong>{{ msg.sender.username }}</strong> • {{ msg.created_at.strftime('%H:%M') }}
+            </small>
+            <p class="mb-1">{{ msg.text }}</p>
+            {% if msg.file_path %}
+            <a href="/{{ msg.file_path }}" target="_blank" class="text-decoration-underline">📎 Скачать файл</a>
+            {% endif %}
+        </div>
+        {% else %}
+        <p class="text-center text-muted">Пока сообщений нет. Напишите первым!</p>
+        {% endfor %}
+    </div>
+
+    <div class="card-footer">
+        <form method="POST" action="{{ url_for('tasks.send_message', task_id=task.id) }}" enctype="multipart/form-data">
+            <div class="input-group">
+                <input type="text" name="text" class="form-control" placeholder="Напишите сообщение..." required>
+                <input type="file" name="file" class="form-control" style="max-width: 200px;">
+                <button type="submit" class="btn btn-primary">Отправить</button>
+            </div>
+        </form>
+    </div>
 </div>
 
-{% if task.file_path %}
-<p><a href="/{{ task.file_path }}" target="_blank">📎 Скачать прикреплённый файл</a></p>
-{% endif %}
-
+<!-- Кнопки действий -->
 <div class="mt-4">
-    {% if current_user.is_authenticated %}
-        {% if current_user.id == task.executor_id and task.status.value == 'Принята' %}
-            <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning btn-lg">
-                Отметить как выполненную
-            </a>
-        {% endif %}
+    {% if current_user.id == task.executor_id and task.status.value == 'Принята' %}
+        <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning btn-lg">
+            Отметить как выполненную
+        </a>
+    {% endif %}
 
-        {% if current_user.id == task.customer_id and task.status.value == 'Выполнена' %}
-            <a href="{{ url_for('tasks.confirm_task', task_id=task.id) }}" class="btn btn-success btn-lg">
-                ✅ Подтвердить выполнение и выплатить награду
-            </a>
-        {% endif %}
+    {% if current_user.id == task.customer_id and task.status.value == 'Выполнена' %}
+        <a href="{{ url_for('tasks.confirm_task', task_id=task.id) }}" class="btn btn-success btn-lg">
+            ✅ Подтвердить выполнение и выплатить награду
+        </a>
     {% endif %}
 </div>
 
