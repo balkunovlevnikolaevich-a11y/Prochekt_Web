@@ -41,6 +41,7 @@ class Task(db.Model):
     executor_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     file_path = db.Column(db.String(300), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    messages = db.relationship('Message', backref='task', lazy=True, cascade="all, delete-orphan")
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
