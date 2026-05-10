@@ -122,7 +122,6 @@ def ai_generate():
 def send_message(task_id):
     task = Task.query.get_or_404(task_id)
     
-    # Только участники задачи могут писать
     if current_user.id not in [task.customer_id, task.executor_id]:
         flash('Вы не участник этой задачи', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
@@ -140,7 +139,7 @@ def send_message(task_id):
         filename = secure_filename(file.filename)
         file_path = os.path.join('uploads', filename)
         file.save(file_path)
-        message.file_path = file_path
+        message.file_name = filename   # ← сохраняем только имя файла
 
     db.session.add(message)
     db.session.commit()
@@ -149,7 +148,7 @@ def send_message(task_id):
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
 
-# Скачивание файлов из чата
-@tasks_bp.route('/uploads/<path:filename>')
+# Скачивание файлов
+@tasks_bp.route('/uploads/<filename>')
 def download_file(filename):
     return send_from_directory('uploads', filename)
