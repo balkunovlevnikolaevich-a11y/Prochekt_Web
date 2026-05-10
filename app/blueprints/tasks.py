@@ -12,7 +12,7 @@ tasks_bp = Blueprint('tasks', __name__)
 @tasks_bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create():
-    if current_user.role != 'CUSTOMER':
+    if current_user.role.value != "Заказчик":
         flash('Только заказчики могут создавать задачи', 'danger')
         return redirect(url_for('main.dashboard'))
     
