@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Открытые задачи</h2>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Задача</th>
+            <th>Категория</th>
+            <th>Награда</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+        <tr>
+            <td><a href="{{ url_for('tasks.task_detail', task_id=task.id) }}">{{ task.title }}</a></td>
+            <td>{{ task.category or '-' }}</td>
+            <td>{{ task.reward }} ₽</td>
+            <td>
+                <a href="{{ url_for('tasks.take_task', task_id=task.id) }}" class="btn btn-sm btn-primary">Взять</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
