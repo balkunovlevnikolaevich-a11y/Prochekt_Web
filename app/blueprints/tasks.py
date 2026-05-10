@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from .. import db
-from ..models import Task, TaskStatus, User, UserRole, Message
+from ..models import Task, TaskStatus, User, UserRole, Message, Advertisement
 from ..forms import TaskForm
 from ..utils import generate_ai_description
 
@@ -191,3 +191,31 @@ def edit_ad():
         return redirect(url_for('tasks.admin_panel'))
 
     return render_template('edit_ad.html', ad=ad)
+# ====================== РЕДАКТИРОВАНИЕ РЕКЛАМЫ ======================
+@tasks_bp.route('/admin/ad/edit', methods=['GET', 'POST'])
+@login_required
+def edit_ad():
+    if current_user.role != UserRole.ADMIN:
+        flash('Доступ запрещён', 'danger')
+        return redirect(url_for('main.dashboard'))
+
+    ad = Advertisement.query.first()
+    if not ad:
+        ad = Advertisement(
+            title="Реклама на Prochekt_Web",
+            content="Здесь может быть ваша реклама или объявление",
+            phone="+79111453106"
+        )
+        db.session.add(ad)
+        db.session.commit()
+
+    if request.method == 'POST':
+        ad.title = request.form.get('title')
+        ad.content = request.form.get('content')
+        ad.phone = request.form.get('phone')
+        db.session.commit()
+        flash('Реклама успешно обновлена!', 'success')
+        return redirect(url_for('tasks.admin_panel'))
+
+    return render_template('edit_ad.html', ad=ad)
+    
