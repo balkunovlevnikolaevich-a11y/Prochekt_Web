@@ -9,7 +9,7 @@
 <p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>
 {% endif %}
 
-<!-- ЧАТ -->
+<!-- ЧАТ (мягкий цвет своих сообщений) -->
 <div class="card mt-4">
     <div class="card-header">
         <h5>💬 Чат по задаче</h5>
@@ -19,7 +19,7 @@
         {% for msg in messages %}
         <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
             <div class="{% if msg.sender_id == current_user.id %}bg-info text-dark{% else %}bg-light{% endif %} 
-                        rounded-3 p-3" style="max-width: 75%;">
+                        rounded-3 p-3 shadow-sm" style="max-width: 75%;">
                 
                 <small class="opacity-75 d-block mb-1">
                     <strong>{{ msg.sender.username }}</strong> • {{ msg.created_at.strftime('%H:%M') }}
@@ -28,7 +28,7 @@
                 <p class="mb-1">{{ msg.text }}</p>
                 
                 {% if msg.file_path %}
-                <a href="{{ url_for('tasks.download_file', filename=msg.file_path.split('/')[-1]) }}" 
+                <a href="{{ url_for('tasks.download_file', filename=msg.file_path.split('/')[-1] if '/' in msg.file_path else msg.file_path.split('\\')[-1]) }}" 
                    class="text-decoration-underline small">
                     📎 Скачать файл
                 </a>
@@ -40,7 +40,7 @@
         {% endfor %}
     </div>
 
-    <!-- Форма отправки -->
+    <!-- Форма отправки (без наслоения) -->
     <div class="card-footer p-3">
         <form method="POST" action="{{ url_for('tasks.send_message', task_id=task.id) }}" enctype="multipart/form-data">
             <div class="mb-3">
