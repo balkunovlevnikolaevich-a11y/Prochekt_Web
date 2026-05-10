@@ -49,7 +49,8 @@ def create():
 
 @tasks_bp.route('/list')
 def list_tasks():
-    tasks = Task.query.filter_by(status='Открыта').all()
+    # Показываем ВСЕ открытые задачи (исправленный фильтр)
+    tasks = Task.query.filter_by(status=TaskStatus.OPEN).all()
     return render_template('task_list.html', tasks=tasks)
 
 @tasks_bp.route('/<int:task_id>')
