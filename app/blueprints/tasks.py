@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import os
 from .. import db
-from ..models import Task, TaskStatus, User   # ← вот эту строку добавь/исправь
+from ..models import Task, TaskStatus, User          # ← эта строка должна быть
 from ..forms import TaskForm
 from ..utils import generate_ai_description
 
@@ -66,8 +66,8 @@ def task_detail(task_id):
 @login_required
 def take_task(task_id):
     task = Task.query.get_or_404(task_id)
-
-    # Отладка — покажи текущее состояние
+    
+    # Отладка
     print(f"DEBUG: Задача {task.id} | Статус: {task.status} | Исполнитель: {task.executor_id}")
 
     if task.status != TaskStatus.OPEN:
@@ -78,20 +78,14 @@ def take_task(task_id):
         flash('Вы не можете взять свою собственную задачу', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
 
-    # Основное изменение — явно присваиваем Enum
+    # Основное действие
     task.status = TaskStatus.TAKEN
     task.executor_id = current_user.id
-
-    db.session.commit()   # ← это важно!
+    db.session.commit()
 
     flash('Задача успешно взята в работу! ✅', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
-    
-    task.status = 'Принята'
-    task.executor_id = current_user.id
-    db.session.commit()
-    flash('Задача принята!', 'success')
-    return redirect(url_for('tasks.task_detail', task_id=task_id))
+
 
 @tasks_bp.route('/<int:task_id>/complete')
 @login_required
@@ -105,11 +99,6 @@ def complete_task(task_id):
     task.status = TaskStatus.COMPLETED
     db.session.commit()
     
-    flash('Задача отмечена как выполненная!', 'success')
-    return redirect(url_for('tasks.task_detail', task_id=task_id))
-    
-    task.status = 'Выполнена'
-    db.session.commit()
     flash('Задача отмечена как выполненная!', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
