@@ -9,6 +9,9 @@ def index():
         return redirect(url_for('main.dashboard'))
     return render_template('index.html')
 
+from flask_login import login_required
+
 @main_bp.route('/dashboard')
+@login_required
 def dashboard():
     return render_template('dashboard.html')
