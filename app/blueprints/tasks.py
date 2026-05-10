@@ -67,7 +67,6 @@ def take_task(task_id):
     if task.customer_id == current_user.id:
         flash('Вы не можете взять свою собственную задачу', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
-
     task.status = TaskStatus.TAKEN
     task.executor_id = current_user.id
     db.session.commit()
@@ -83,7 +82,6 @@ def complete_task(task_id):
     if task.executor_id != current_user.id:
         flash('Это не ваша задача', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
-
     task.status = TaskStatus.COMPLETED
     db.session.commit()
     flash('Задача отмечена как выполненная. Ожидаем подтверждения.', 'success')
@@ -98,19 +96,25 @@ def confirm_task(task_id):
     if task.customer_id != current_user.id:
         flash('Только заказчик может подтвердить', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
-
     if task.status != TaskStatus.COMPLETED:
         flash('Задача ещё не отмечена как выполненная', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
-
     task.status = TaskStatus.VERIFIED
     executor = User.query.get(task.executor_id)
     if executor:
         executor.balance += task.reward
-
     db.session.commit()
     flash('Выполнение подтверждено! Деньги перечислены.', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
+
+
+# AI-генерация описания
+@tasks_bp.route('/ai_generate', methods=['POST'])
+@login_required
+def ai_generate():
+    prompt = request.form.get('prompt', '')
+    description = generate_ai_description(prompt)
+    return {'description': description}
 
 
 # Чат
@@ -121,17 +125,26 @@ def send_message(task_id):
     if current_user.id not in [task.customer_id, task.executor_id]:
         flash('Вы не участник этой задачи', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
-
     text = request.form.get('text', '').strip()
     if not text:
         flash('Сообщение не может быть пустым', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
-
     message = Message(task_id=task_id, sender_id=current_user.id, text=text)
     db.session.add(message)
     db.session.commit()
     flash('Сообщение отправлено', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
+
+
+# Админ-панель
+@tasks_bp.route('/admin')
+@login_required
+def admin_panel():
+    if current_user.role != UserRole.ADMIN:
+        flash('Доступ запрещён. Только для администратора.', 'danger')
+        return redirect(url_for('main.dashboard'))
+    tasks = Task.query.order_by(Task.created_at.desc()).all()
+    return render_template('admin.html', tasks=tasks)
 
 
 # Отмена задачи (только админ)
@@ -142,11 +155,9 @@ def cancel_task(task_id):
     if current_user.role != UserRole.ADMIN:
         flash('Только администратор может отменять задачи', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
-
     customer = User.query.get(task.customer_id)
     if customer:
         customer.balance += task.reward
-
     task.status = TaskStatus.CANCELLED
     db.session.commit()
     flash('Задача отменена. Деньги возвращены заказчику.', 'success')
