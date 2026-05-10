@@ -1,17 +1,14 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
-from werkzeug.utils import secure_filename
-import os
 from .. import db
 from ..models import Task, TaskStatus, User, UserRole, Message
 from ..forms import TaskForm
 from ..utils import generate_ai_description
-from flask import send_from_directory
 
 tasks_bp = Blueprint('tasks', __name__)
 
 
-# ====================== СОЗДАНИЕ ЗАДАЧИ ======================
+# Создание задачи
 @tasks_bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create():
@@ -42,7 +39,7 @@ def create():
     return render_template('create_task.html', form=form)
 
 
-# ====================== СПИСОК ЗАДАЧ ======================
+# Список задач
 @tasks_bp.route('/list')
 def list_tasks():
     tasks = Task.query.filter(
@@ -51,22 +48,19 @@ def list_tasks():
     return render_template('task_list.html', tasks=tasks)
 
 
-# ====================== ДЕТАЛИ ЗАДАЧИ ======================
+# Детали задачи
 @tasks_bp.route('/<int:task_id>')
 def task_detail(task_id):
     task = Task.query.get_or_404(task_id)
-    messages = Message.query.filter_by(task_id=task_id)\
-        .order_by(Message.created_at.asc()).all()
+    messages = Message.query.filter_by(task_id=task_id).order_by(Message.created_at.asc()).all()
     return render_template('task_detail.html', task=task, messages=messages)
 
 
-# ====================== ВЗЯТЬ ЗАДАЧУ ======================
+# Взять задачу
 @tasks_bp.route('/<int:task_id>/take')
 @login_required
 def take_task(task_id):
     task = Task.query.get_or_404(task_id)
-    print(f"DEBUG: Задача {task.id} | Статус: {task.status} | Исполнитель: {task.executor_id}")
-    
     if task.status != TaskStatus.OPEN:
         flash('Задача уже занята или завершена', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
@@ -81,7 +75,7 @@ def take_task(task_id):
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
 
-# ====================== ЗАВЕРШИТЬ ЗАДАЧУ ======================
+# Отметить как выполненную
 @tasks_bp.route('/<int:task_id>/complete')
 @login_required
 def complete_task(task_id):
@@ -92,17 +86,17 @@ def complete_task(task_id):
 
     task.status = TaskStatus.COMPLETED
     db.session.commit()
-    flash('Задача отмечена как выполненная. Ожидаем подтверждения заказчика.', 'success')
+    flash('Задача отмечена как выполненная. Ожидаем подтверждения.', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
 
-# ====================== ПОДТВЕРДИТЬ ЗАДАЧУ ======================
+# Подтвердить выполнение
 @tasks_bp.route('/<int:task_id>/confirm')
 @login_required
 def confirm_task(task_id):
     task = Task.query.get_or_404(task_id)
     if task.customer_id != current_user.id:
-        flash('Только заказчик может подтвердить выполнение', 'danger')
+        flash('Только заказчик может подтвердить', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
 
     if task.status != TaskStatus.COMPLETED:
@@ -115,20 +109,11 @@ def confirm_task(task_id):
         executor.balance += task.reward
 
     db.session.commit()
-    flash('Выполнение подтверждено! Деньги перечислены исполнителю.', 'success')
+    flash('Выполнение подтверждено! Деньги перечислены.', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
 
-# ====================== AI ======================
-@tasks_bp.route('/ai_generate', methods=['POST'])
-@login_required
-def ai_generate():
-    prompt = request.form.get('prompt', '')
-    description = generate_ai_description(prompt)
-    return {'description': description}
-
-
-# ====================== ЧАТ ======================
+# Чат
 @tasks_bp.route('/<int:task_id>/send_message', methods=['POST'])
 @login_required
 def send_message(task_id):
@@ -145,12 +130,11 @@ def send_message(task_id):
     message = Message(task_id=task_id, sender_id=current_user.id, text=text)
     db.session.add(message)
     db.session.commit()
-
     flash('Сообщение отправлено', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
 
-# ====================== ОТМЕНА ЗАДАЧИ (АДМИН) ======================
+# Отмена задачи (только админ)
 @tasks_bp.route('/<int:task_id>/cancel')
 @login_required
 def cancel_task(task_id):
@@ -159,23 +143,11 @@ def cancel_task(task_id):
         flash('Только администратор может отменять задачи', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
 
-    if task.status == TaskStatus.CANCELLED:
-        flash('Задача уже отменена', 'warning')
-        return redirect(url_for('tasks.task_detail', task_id=task_id))
-
-    # Возврат денег заказчику
     customer = User.query.get(task.customer_id)
     if customer:
         customer.balance += task.reward
 
     task.status = TaskStatus.CANCELLED
     db.session.commit()
-
     flash('Задача отменена. Деньги возвращены заказчику.', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
-
-
-# ====================== СКАЧИВАНИЕ ======================
-@tasks_bp.route('/uploads/<filename>')
-def download_file(filename):
-    return send_from_directory('uploads', filename)
