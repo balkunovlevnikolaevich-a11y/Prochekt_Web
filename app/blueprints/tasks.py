@@ -3,16 +3,17 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import os
 from .. import db
-from ..models import Task, TaskStatus, User          # ← эта строка должна быть
+from ..models import Task, TaskStatus, User, UserRole   # ← исправленная строка
 from ..forms import TaskForm
 from ..utils import generate_ai_description
 
 tasks_bp = Blueprint('tasks', __name__)
 
+
 @tasks_bp.route('/create', methods=['GET', 'POST'])
 @login_required
 def create():
-    if current_user.role.value != "Заказчик":
+    if current_user.role != UserRole.CUSTOMER:
         flash('Только заказчики могут создавать задачи', 'danger')
         return redirect(url_for('main.dashboard'))
     
