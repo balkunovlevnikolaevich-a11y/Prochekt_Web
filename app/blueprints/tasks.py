@@ -50,11 +50,11 @@ def create():
 
 @tasks_bp.route('/list')
 def list_tasks():
-    # Временный режим отладки — показываем ВСЕ задачи (чтобы точно увидеть, что они создаются)
-    tasks = Task.query.order_by(Task.created_at.desc()).all()
-    
-    # Если хочешь видеть только открытые — раскомментируй строку ниже и закомментируй верхнюю
-    # tasks = Task.query.filter_by(status=TaskStatus.OPEN).all()
+    # Показываем только активные задачи (Открыта и Принята)
+    # Завершённые (Выполнена и Подтверждена) больше не отображаются в общем списке
+    tasks = Task.query.filter(
+        Task.status.in_([TaskStatus.OPEN, TaskStatus.TAKEN])
+    ).order_by(Task.created_at.desc()).all()
     
     return render_template('task_list.html', tasks=tasks)
 
