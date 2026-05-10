@@ -136,16 +136,22 @@ def send_message(task_id):
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
 
-# Админ-панель
+# ====================== АДМИН-ПАНЕЛЬ (только проблемные задачи) ======================
 @tasks_bp.route('/admin')
 @login_required
 def admin_panel():
     if current_user.role != UserRole.ADMIN:
         flash('Доступ запрещён. Только для администратора.', 'danger')
         return redirect(url_for('main.dashboard'))
-    tasks = Task.query.order_by(Task.created_at.desc()).all()
-    return render_template('admin.html', tasks=tasks)
 
+    # Показываем ТОЛЬКО задачи, где было обращение в поддержку
+    tasks = Task.query.filter(
+        Task.messages.any(
+            Message.text.ilike('%Обращение в поддержку%')
+        )
+    ).order_by(Task.created_at.desc()).all()
+
+    return render_template('admin.html', tasks=tasks)
 
 # Отмена задачи (только админ)
 @tasks_bp.route('/<int:task_id>/cancel')
