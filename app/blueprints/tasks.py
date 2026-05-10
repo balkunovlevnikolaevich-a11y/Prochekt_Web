@@ -135,3 +135,35 @@ def confirm_task(task_id):
     
     flash('Выполнение подтверждено! Деньги перечислены исполнителю.', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
+
+# ====================== ЧАТ ======================
+@tasks_bp.route('/<int:task_id>/send_message', methods=['POST'])
+@login_required
+def send_message(task_id):
+    task = Task.query.get_or_404(task_id)
+    
+    # Только участники задачи могут писать
+    if current_user.id not in [task.customer_id, task.executor_id]:
+        flash('Вы не участник этой задачи', 'danger')
+        return redirect(url_for('tasks.task_detail', task_id=task_id))
+
+    text = request.form.get('text', '').strip()
+    file = request.files.get('file')
+
+    if not text and not file:
+        flash('Сообщение не может быть пустым', 'danger')
+        return redirect(url_for('tasks.task_detail', task_id=task_id))
+
+    message = Message(task_id=task_id, sender_id=current_user.id, text=text)
+
+    if file and file.filename:
+        filename = secure_filename(file.filename)
+        file_path = os.path.join('uploads', filename)
+        file.save(file_path)
+        message.file_path = file_path
+
+    db.session.add(message)
+    db.session.commit()
+
+    flash('Сообщение отправлено', 'success')
+    return redirect(url_for('tasks.task_detail', task_id=task_id))
