@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="text-center">Добро пожаловать в Prochekt_Web!</h1>
+<p class="text-center">Платформа для постановки и выполнения задач с наградами</p>
+<div class="text-center">
+    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Начать</a>
+</div>
+{% endblock %}
