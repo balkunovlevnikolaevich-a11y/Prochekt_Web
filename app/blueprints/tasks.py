@@ -66,9 +66,7 @@ def task_detail(task_id):
     messages = Message.query.filter_by(task_id=task_id)\
         .order_by(Message.created_at.asc()).all()
     
-    return render_template('task_detail.html', 
-                           task=task, 
-                           messages=messages)
+    return render_template('task_detail.html', task=task, messages=messages)
 
 @tasks_bp.route('/<int:task_id>/take')
 @login_required
