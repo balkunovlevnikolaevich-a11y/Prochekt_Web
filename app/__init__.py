@@ -43,4 +43,11 @@ def create_app():
     def load_user(user_id):
         return User.query.get(int(user_id))
 
+        # Контекст для рекламы (доступна на всех страницах)
+    @app.context_processor
+    def inject_ad():
+        from .models import Advertisement
+        ad = Advertisement.query.first()
+        return {'ad': ad}
+
     return app
