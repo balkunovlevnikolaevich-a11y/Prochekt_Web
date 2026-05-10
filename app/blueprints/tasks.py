@@ -67,11 +67,9 @@ def task_detail(task_id):
 def take_task(task_id):
     task = Task.query.get_or_404(task_id)
     
-    # Отладка
     print(f"DEBUG: Задача {task.id} | Статус: {task.status} | Исполнитель: {task.executor_id}")
 
-    # Используем .value — это надёжнее в blueprints
-    if task.status.value != "Открыта":
+    if task.status != TaskStatus.OPEN:          # ← используем Enum, а не .value
         flash('Задача уже занята или завершена', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
 
@@ -79,7 +77,6 @@ def take_task(task_id):
         flash('Вы не можете взять свою собственную задачу', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
 
-    # Берём задачу
     task.status = TaskStatus.TAKEN
     task.executor_id = current_user.id
     db.session.commit()
@@ -97,15 +94,43 @@ def complete_task(task_id):
         flash('Это не ваша задача', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
     
+    # Исполнитель только отмечает как выполненную (ожидает подтверждения)
     task.status = TaskStatus.COMPLETED
     db.session.commit()
     
-    flash('Задача отмечена как выполненная!', 'success')
+    flash('Задача отмечена как выполненная. Ожидаем подтверждения заказчика.', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
-
+    
 @tasks_bp.route('/ai_generate', methods=['POST'])
 @login_required
 def ai_generate():
     prompt = request.form.get('prompt', '')
     description = generate_ai_description(prompt)
     return {'description': description}  # для JS (можно расширить)
+    
+@tasks_bp.route('/<int:task_id>/confirm')
+@login_required
+def confirm_task(task_id):
+    task = Task.query.get_or_404(task_id)
+    
+    # Только заказчик может подтвердить
+    if task.customer_id != current_user.id:
+        flash('Только заказчик может подтвердить выполнение', 'danger')
+        return redirect(url_for('tasks.task_detail', task_id=task_id))
+    
+    if task.status != TaskStatus.COMPLETED:
+        flash('Задача ещё не отмечена как выполненная', 'danger')
+        return redirect(url_for('tasks.task_detail', task_id=task_id))
+    
+    # Подтверждаем выполнение
+    task.status = TaskStatus.VERIFIED
+    
+    # Начисляем деньги исполнителю
+    executor = User.query.get(task.executor_id)
+    if executor:
+        executor.balance += task.reward
+    
+    db.session.commit()
+    
+    flash('Выполнение подтверждено! Деньги перечислены исполнителю.', 'success')
+    return redirect(url_for('tasks.task_detail', task_id=task_id))
