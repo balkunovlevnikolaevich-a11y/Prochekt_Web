@@ -113,34 +113,8 @@ def complete_task(task_id):
 def ai_generate():
     prompt = request.form.get('prompt', '')
     description = generate_ai_description(prompt)
-    return {'description': description}  # для JS (можно расширить)
-    
-@tasks_bp.route('/<int:task_id>/confirm')
-@login_required
-def confirm_task(task_id):
-    task = Task.query.get_or_404(task_id)
-    
-    # Только заказчик может подтвердить
-    if task.customer_id != current_user.id:
-        flash('Только заказчик может подтвердить выполнение', 'danger')
-        return redirect(url_for('tasks.task_detail', task_id=task_id))
-    
-    if task.status != TaskStatus.COMPLETED:
-        flash('Задача ещё не отмечена как выполненная', 'danger')
-        return redirect(url_for('tasks.task_detail', task_id=task_id))
-    
-    # Подтверждаем выполнение
-    task.status = TaskStatus.VERIFIED
-    
-    # Начисляем деньги исполнителю
-    executor = User.query.get(task.executor_id)
-    if executor:
-        executor.balance += task.reward
-    
-    db.session.commit()
-    
-    flash('Выполнение подтверждено! Деньги перечислены исполнителю.', 'success')
-    return redirect(url_for('tasks.task_detail', task_id=task_id))
+    return {'description': description}
+
 
 # ====================== ЧАТ ======================
 @tasks_bp.route('/<int:task_id>/send_message', methods=['POST'])
@@ -170,10 +144,12 @@ def send_message(task_id):
 
     db.session.add(message)
     db.session.commit()
+
+    flash('Сообщение отправлено', 'success')
+    return redirect(url_for('tasks.task_detail', task_id=task_id))
+
+
 # Скачивание файлов из чата
 @tasks_bp.route('/uploads/<path:filename>')
 def download_file(filename):
     return send_from_directory('uploads', filename)
-    
-    flash('Сообщение отправлено', 'success')
-    return redirect(url_for('tasks.task_detail', task_id=task_id))
