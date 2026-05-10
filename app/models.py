@@ -42,5 +42,15 @@ class Task(db.Model):
     file_path = db.Column(db.String(300), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('task.id'), nullable=False)
+    sender_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    text = db.Column(db.Text, nullable=True)
+    file_path = db.Column(db.String(300), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    sender = db.relationship('User', foreign_keys=[sender_id], backref='sent_messages')
+    
     def __repr__(self):
-        return f'<Task {self.title}>'
+        return f'<Message {self.id}>'
