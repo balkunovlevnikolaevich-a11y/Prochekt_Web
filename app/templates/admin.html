@@ -3,6 +3,13 @@
 
 <h2 class="mb-4">👑 Админ-панель — Проблемные задачи</h2>
 
+<!-- Кнопка редактирования рекламы -->
+<div class="mb-4">
+    <a href="{{ url_for('tasks.edit_ad') }}" class="btn btn-warning btn-lg">
+        ✏️ Редактировать рекламу
+    </a>
+</div>
+
 {% if tasks %}
 <div class="card">
     <div class="card-header bg-danger text-white">
@@ -38,8 +45,8 @@
                         <a href="{{ url_for('tasks.task_detail', task_id=task.id) }}" class="btn btn-sm btn-primary">Открыть чат</a>
                         <a href="{{ url_for('tasks.cancel_task', task_id=task.id) }}" 
                            class="btn btn-sm btn-danger"
-                           onclick="return confirm('Отменить задачу №{{ task.id }} и вернуть деньги заказчику?')">
-                            ❌ Отменить задачу
+                           onclick="return confirm('Отменить задачу №{{ task.id }} и вернуть деньги?')">
+                            ❌ Отменить
                         </a>
                     </td>
                 </tr>
@@ -49,8 +56,8 @@
     </div>
 </div>
 {% else %}
-<div class="alert alert-success">
-    <h5>Отлично! На данный момент нет обращений в поддержку.</h5>
+<div class="alert alert-success text-center py-4">
+    <h5>На данный момент нет обращений в поддержку</h5>
 </div>
 {% endif %}
 
