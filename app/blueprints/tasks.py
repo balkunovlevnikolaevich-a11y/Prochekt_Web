@@ -66,9 +66,26 @@ def task_detail(task_id):
 @login_required
 def take_task(task_id):
     task = Task.query.get_or_404(task_id)
-    if task.status != 'Открыта':
-        flash('Задача уже занята', 'danger')
+
+    # Отладка — покажи текущее состояние
+    print(f"DEBUG: Задача {task.id} | Статус: {task.status} | Исполнитель: {task.executor_id}")
+
+    if task.status != TaskStatus.OPEN:
+        flash('Задача уже занята или завершена', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
+
+    if task.customer_id == current_user.id:
+        flash('Вы не можете взять свою собственную задачу', 'danger')
+        return redirect(url_for('tasks.task_detail', task_id=task_id))
+
+    # Основное изменение — явно присваиваем Enum
+    task.status = TaskStatus.TAKEN
+    task.executor_id = current_user.id
+
+    db.session.commit()   # ← это важно!
+
+    flash('Задача успешно взята в работу! ✅', 'success')
+    return redirect(url_for('tasks.task_detail', task_id=task_id))
     
     task.status = 'Принята'
     task.executor_id = current_user.id
