@@ -6,6 +6,7 @@ from .. import db
 from ..models import Task, TaskStatus, User, UserRole, Message   # ← исправленный импорт
 from ..forms import TaskForm
 from ..utils import generate_ai_description
+from flask import send_from_directory
 
 tasks_bp = Blueprint('tasks', __name__)
 
@@ -169,6 +170,10 @@ def send_message(task_id):
 
     db.session.add(message)
     db.session.commit()
-
+# Скачивание файлов из чата
+@tasks_bp.route('/uploads/<path:filename>')
+def download_file(filename):
+    return send_from_directory('uploads', filename)
+    
     flash('Сообщение отправлено', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
