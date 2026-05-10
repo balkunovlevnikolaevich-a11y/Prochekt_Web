@@ -2,7 +2,6 @@
 {% block content %}
 
 <h2>{{ task.title }}</h2>
-
 <p><strong>Статус:</strong> {{ task.status.value }}</p>
 <p><strong>Награда:</strong> {{ task.reward }} ₽</p>
 <p><strong>Заказчик:</strong> {{ task.customer.username if task.customer else 'Неизвестно' }}</p>
@@ -19,9 +18,8 @@
         
         {% for msg in messages %}
         <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
-            
-            <div class="{% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light text-dark{% endif %} 
-                        rounded-3 p-3 shadow-sm" style="max-width: 75%; border-radius: 18px;">
+            <div class="{% if msg.sender_id == current_user.id %}bg-info text-dark{% else %}bg-light{% endif %} 
+                        rounded-3 p-3" style="max-width: 75%;">
                 
                 <small class="opacity-75 d-block mb-1">
                     <strong>{{ msg.sender.username }}</strong> • {{ msg.created_at.strftime('%H:%M') }}
@@ -42,15 +40,15 @@
         {% endfor %}
     </div>
 
-    <!-- Форма отправки (без наслоения) -->
+    <!-- Форма отправки -->
     <div class="card-footer p-3">
         <form method="POST" action="{{ url_for('tasks.send_message', task_id=task.id) }}" enctype="multipart/form-data">
             <div class="mb-3">
                 <input type="text" name="text" class="form-control" placeholder="Напишите сообщение..." autocomplete="off">
             </div>
-            <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex gap-2">
                 <input type="file" name="file" class="form-control">
-                <button type="submit" class="btn btn-primary px-4">Отправить</button>
+                <button type="submit" class="btn btn-primary">Отправить</button>
             </div>
         </form>
     </div>
