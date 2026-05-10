@@ -80,9 +80,16 @@ def take_task(task_id):
 @login_required
 def complete_task(task_id):
     task = Task.query.get_or_404(task_id)
+    
     if task.executor_id != current_user.id:
         flash('Это не ваша задача', 'danger')
         return redirect(url_for('tasks.task_detail', task_id=task_id))
+    
+    task.status = TaskStatus.COMPLETED
+    db.session.commit()
+    
+    flash('Задача отмечена как выполненная!', 'success')
+    return redirect(url_for('tasks.task_detail', task_id=task_id))
     
     task.status = 'Выполнена'
     db.session.commit()
