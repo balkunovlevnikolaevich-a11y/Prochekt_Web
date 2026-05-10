@@ -108,7 +108,7 @@ def confirm_task(task_id):
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
 
-# AI-генерация описания
+# AI-генерация
 @tasks_bp.route('/ai_generate', methods=['POST'])
 @login_required
 def ai_generate():
@@ -136,24 +136,22 @@ def send_message(task_id):
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
 
-# ====================== АДМИН-ПАНЕЛЬ (только проблемные задачи) ======================
+# Админ-панель (только проблемные задачи)
 @tasks_bp.route('/admin')
 @login_required
 def admin_panel():
     if current_user.role != UserRole.ADMIN:
         flash('Доступ запрещён. Только для администратора.', 'danger')
         return redirect(url_for('main.dashboard'))
-
-    # Показываем ТОЛЬКО задачи, где было обращение в поддержку
     tasks = Task.query.filter(
         Task.messages.any(
             Message.text.ilike('%Обращение в поддержку%')
         )
     ).order_by(Task.created_at.desc()).all()
-
     return render_template('admin.html', tasks=tasks)
 
-# Отмена задачи (только админ)
+
+# Отмена задачи
 @tasks_bp.route('/<int:task_id>/cancel')
 @login_required
 def cancel_task(task_id):
@@ -169,7 +167,8 @@ def cancel_task(task_id):
     flash('Задача отменена. Деньги возвращены заказчику.', 'success')
     return redirect(url_for('tasks.task_detail', task_id=task_id))
 
-# ====================== РЕДАКТИРОВАНИЕ РЕКЛАМЫ ======================
+
+# Редактирование рекламы
 @tasks_bp.route('/admin/ad/edit', methods=['GET', 'POST'])
 @login_required
 def edit_ad():
@@ -196,4 +195,3 @@ def edit_ad():
         return redirect(url_for('tasks.admin_panel'))
 
     return render_template('edit_ad.html', ad=ad)
-    
