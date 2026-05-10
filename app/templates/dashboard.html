@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Личный кабинет — {{ current_user.username }}</h2>
+<p><strong>Роль:</strong> {{ current_user.role.value }} | <strong>Баланс:</strong> {{ current_user.balance }} ₽</p>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <a href="{{ url_for('tasks.create') }}" class="btn btn-success btn-lg w-100">Создать новую задачу</a>
+    </div>
+    <div class="col-md-6">
+        <a href="{{ url_for('tasks.list_tasks') }}" class="btn btn-primary btn-lg w-100">Смотреть все задачи</a>
+    </div>
+</div>
+{% endblock %}
