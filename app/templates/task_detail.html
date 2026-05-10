@@ -9,13 +9,11 @@
 <p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>
 {% endif %}
 
-<!-- ЧАТ -->
 <div class="card mt-4">
     <div class="card-header">
         <h5>💬 Чат по задаче</h5>
     </div>
     <div class="card-body" style="max-height: 480px; overflow-y: auto; background: #f1f3f5; padding: 15px;" id="chat-box">
-        
         {% for msg in messages %}
         <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
             <div class="{% if msg.sender_id == current_user.id %}bg-info text-dark{% else %}bg-light{% endif %} rounded-3 p-3" style="max-width: 75%;">
@@ -23,7 +21,6 @@
                     <strong>{{ msg.sender.username }}</strong> • {{ msg.created_at.strftime('%H:%M') }}
                 </small>
                 <p class="mb-1">{{ msg.text }}</p>
-                
                 {% if msg.file_name %}
                 <a href="{{ url_for('tasks.download_file', filename=msg.file_name) }}" class="text-decoration-underline small">
                     📎 Скачать файл
@@ -36,7 +33,6 @@
         {% endfor %}
     </div>
 
-    <!-- Форма отправки -->
     <div class="card-footer p-3">
         <form method="POST" action="{{ url_for('tasks.send_message', task_id=task.id) }}" enctype="multipart/form-data">
             <div class="mb-3">
@@ -50,7 +46,6 @@
     </div>
 </div>
 
-<!-- Кнопки действий -->
 <div class="mt-4">
     {% if current_user.id == task.executor_id and task.status.value == 'Принята' %}
         <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning btn-lg">Отметить как выполненную</a>
