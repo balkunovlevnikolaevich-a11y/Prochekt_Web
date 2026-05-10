@@ -1,13 +1,42 @@
-<div class="mt-4">
-    {% if current_user.id == task.executor_id and task.status.value == 'Принята' %}
-        <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning btn-lg">
-            Отметить как выполненную
-        </a>
-    {% endif %}
+{% extends "base.html" %}
+{% block content %}
 
-    {% if current_user.id == task.customer_id and task.status.value == 'Выполнена' %}
-        <a href="{{ url_for('tasks.confirm_task', task_id=task.id) }}" class="btn btn-success btn-lg">
-            ✅ Подтвердить выполнение и перечислить награду
-        </a>
+<h2>{{ task.title }}</h2>
+
+<p><strong>Статус:</strong> {{ task.status.value }}</p>
+<p><strong>Награда:</strong> {{ task.reward }} ₽</p>
+
+<p><strong>Заказчик:</strong> 
+    {% if task.customer %}{{ task.customer.username }}{% else %}Неизвестно{% endif %}
+</p>
+
+{% if task.executor %}
+<p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>
+{% endif %}
+
+<div class="mt-4">
+    <h5>Описание:</h5>
+    <p style="white-space: pre-wrap;">{{ task.description }}</p>
+</div>
+
+{% if task.file_path %}
+<p><a href="/{{ task.file_path }}" target="_blank">📎 Скачать прикреплённый файл</a></p>
+{% endif %}
+
+<div class="mt-4">
+    {% if current_user.is_authenticated %}
+        {% if current_user.id == task.executor_id and task.status.value == 'Принята' %}
+            <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning btn-lg">
+                Отметить как выполненную
+            </a>
+        {% endif %}
+
+        {% if current_user.id == task.customer_id and task.status.value == 'Выполнена' %}
+            <a href="{{ url_for('tasks.confirm_task', task_id=task.id) }}" class="btn btn-success btn-lg">
+                ✅ Подтвердить выполнение и выплатить награду
+            </a>
+        {% endif %}
     {% endif %}
 </div>
+
+{% endblock %}
