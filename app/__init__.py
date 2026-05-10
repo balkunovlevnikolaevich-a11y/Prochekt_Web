@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
@@ -31,6 +32,7 @@ def create_app():
     # Создаём папку uploads
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+    # Создаём таблицы в базе данных
     with app.app_context():
         db.create_all()
 
