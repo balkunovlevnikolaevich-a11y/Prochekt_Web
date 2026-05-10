@@ -9,22 +9,21 @@
 <p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>
 {% endif %}
 
-<!-- ЧАТ В СТИЛЕ TELEGRAM -->
+<!-- ЧАТ -->
 <div class="card mt-4">
-    <div class="card-header bg-light">
+    <div class="card-header">
         <h5>💬 Чат по задаче</h5>
     </div>
-    <div class="card-body p-3" style="max-height: 450px; overflow-y: auto; background: #f1f3f5;" id="chat-box">
+    <div class="card-body" style="max-height: 450px; overflow-y: auto; background: #f1f3f5;" id="chat-box">
         {% for msg in messages %}
         <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
-            <div class="{% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %} 
-                        rounded-3 p-3" style="max-width: 70%;">
+            <div class="{% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %} rounded-3 p-3" style="max-width: 75%;">
                 <small class="opacity-75">
                     <strong>{{ msg.sender.username }}</strong> • {{ msg.created_at.strftime('%H:%M') }}
                 </small>
                 <p class="mb-1">{{ msg.text }}</p>
                 {% if msg.file_path %}
-                <a href="/uploads/{{ msg.file_path.split('/')[-1] }}" class="text-decoration-underline small">
+                <a href="{{ url_for('tasks.download_file', filename=msg.file_path.split('/')[-1]) }}" class="text-decoration-underline small">
                     📎 Скачать файл
                 </a>
                 {% endif %}
