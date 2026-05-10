@@ -17,7 +17,6 @@
     </style>
 </head>
 <body>
-    <!-- Навбар -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
@@ -28,18 +27,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('tasks.list_tasks') }}">Задачи</a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('tasks.list_tasks') }}">Задачи</a></li>
                     {% if current_user.is_authenticated and current_user.role.value == 'Администратор' %}
-                    <li class="nav-item">
-                        <a class="nav-link admin-link" href="{{ url_for('tasks.admin_panel') }}">
-                            👑 Админ-панель
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link admin-link" href="{{ url_for('tasks.admin_panel') }}">👑 Админ-панель</a></li>
                     {% endif %}
                 </ul>
-
                 <ul class="navbar-nav">
                     {% if current_user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Кабинет</a></li>
@@ -64,16 +56,18 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- БЛОК РЕКЛАМЫ -->
+    <!-- ДИНАМИЧЕСКАЯ РЕКЛАМА ИЗ БАЗЫ -->
+    {% if ad and ad.active %}
     <div class="container mt-5">
         <div class="ad-banner p-4 text-center">
-            <h5 class="mb-2">📣 Реклама на Prochekt_Web</h5>
-            <p class="mb-3">Здесь может быть ваша реклама или объявление</p>
-            <a href="tel:+79111453106" class="btn btn-light btn-lg">
-                📞 Позвонить: <strong>+7 911 145-31-06</strong>
+            <h5 class="mb-2">{{ ad.title }}</h5>
+            <p class="mb-3">{{ ad.content }}</p>
+            <a href="tel:{{ ad.phone }}" class="btn btn-light btn-lg">
+                📞 Позвонить: <strong>{{ ad.phone }}</strong>
             </a>
         </div>
     </div>
+    {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
