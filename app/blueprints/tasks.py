@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 import os
 from .. import db
-from ..models import Task, User
+from ..models import Task, TaskStatus, User   # ← вот эту строку добавь/исправь
 from ..forms import TaskForm
 from ..utils import generate_ai_description
 
