@@ -9,12 +9,17 @@ auth_bp = Blueprint('auth', __name__)
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
-        user = User(username=form.username.data, role=form.role.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Регистрация успешна!', 'success')
-        return redirect(url_for('auth.login'))
+        try:
+            user = User(username=form.username.data, role=form.role.data)
+            user.set_password(form.password.data)
+            db.session.add(user)
+            db.session.commit()
+            flash('Регистрация прошла успешно!', 'success')
+            return redirect(url_for('auth.login'))
+        except Exception as e:  # ловим ошибку уникальности username
+            db.session.rollback()
+            flash('Пользователь с таким именем уже существует!', 'danger')
+    
     return render_template('register.html', form=form)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
