@@ -10,27 +10,21 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        role = request.form.get('role', 'CUSTOMER')
-
-        if not username or not password:
-            flash('Заполните все поля', 'danger')
-            return redirect(url_for('auth.register'))
-
-        # ←←←←←←←←←←←←←←←←← ПРОВЕРКА НА СУЩЕСТВОВАНИЕ ←←←←←←←←←←←←←←←←←
-        if User.query.filter_by(username=username).first():
+    form = RegistrationForm()
+    
+    if form.validate_on_submit():
+        # Проверка на существование пользователя (твоя проверка сохранена)
+        if User.query.filter_by(username=form.username.data).first():
             flash('Пользователь с таким именем уже существует!', 'danger')
             return redirect(url_for('auth.register'))
-        # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
 
+        # Создаём пользователя
         user = User(
-            username=username,
-            password_hash=generate_password_hash(password),
-            role=role,
+            username=form.username.data,
+            role=form.role.data,          # RegistrationForm должен возвращать UserRole
             balance=1000
         )
+        user.set_password(form.password.data)
 
         db.session.add(user)
         db.session.commit()
@@ -38,7 +32,7 @@ def register():
         flash('Регистрация прошла успешно! Теперь войдите в аккаунт.', 'success')
         return redirect(url_for('auth.login'))
 
-    return render_template('auth/register.html')
+    return render_template('auth/register.html', form=form)
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
