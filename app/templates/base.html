@@ -47,23 +47,3 @@
                     <div class="alert alert-{{ category }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
-        {% endwith %}
-
-        {% block content %}{% endblock %}
-    </div>
-
-    <!-- Реклама -->
-    {% if ad and ad.active %}
-    <div class="container mt-5">
-        <div class="ad-banner p-4 text-center">
-            <h5 class="mb-2">{{ ad.title }}</h5>
-            <p class="mb-3">{{ ad.content }}</p>
-            <a href="tel:{{ ad.phone }}" class="btn btn-light btn-lg">
-                📞 Позвонить: <strong>{{ ad.phone }}</strong>
-            </a>
-        </div>
-    </div>
-    {% endif %}
-
-</body>
-</html>
