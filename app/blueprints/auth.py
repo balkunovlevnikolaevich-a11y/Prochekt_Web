@@ -10,18 +10,26 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
-    form = RegistrationForm()
-    
+    form = RegistrationForm()   # ← нужно для красивого шаблона
+
     if form.validate_on_submit():
-        # Проверка на существование пользователя (твоя проверка сохранена)
-        if User.query.filter_by(username=form.username.data).first():
+        username = form.username.data.strip()
+
+        # ←←←←←←←←←←←←←←←←← АВТОМАТИЧЕСКАЯ ВЫДАЧА АДМИНА ←←←←←←←←←←←←←←←←←
+        if username.lower() == 'admin':
+            role = UserRole.ADMIN
+        else:
+            role = form.role.data
+        # ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+
+        # Проверка на существование пользователя
+        if User.query.filter_by(username=username).first():
             flash('Пользователь с таким именем уже существует!', 'danger')
             return redirect(url_for('auth.register'))
 
-        # Создаём пользователя
         user = User(
-            username=form.username.data,
-            role=form.role.data,          # RegistrationForm должен возвращать UserRole
+            username=username,
+            role=role,
             balance=1000
         )
         user.set_password(form.password.data)
