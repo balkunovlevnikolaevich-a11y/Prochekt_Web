@@ -15,7 +15,7 @@
             border-radius: 10px;
         }
         .theme-switch {
-            font-size: 1.7rem;
+            font-size: 1.8rem;
             cursor: pointer;
             transition: transform 0.3s;
         }
@@ -45,9 +45,9 @@
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Войти</a></li>
                     {% endif %}
-                    <!-- Кнопка смены темы -->
+                    <!-- === ИКОНКА СМЕНЫ ТЕМЫ === -->
                     <li class="nav-item ms-3">
-                        <i onclick="toggleTheme()" class="bi bi-sun-fill theme-switch" id="theme-icon"></i>
+                        <i onclick="toggleTheme()" class="bi bi-sun-fill theme-switch" id="theme-icon" title="Сменить тему"></i>
                     </li>
                 </ul>
             </div>
@@ -65,7 +65,6 @@
         {% block content %}{% endblock %}
     </div>
 
-    <!-- ДИНАМИЧЕСКАЯ РЕКЛАМА -->
     {% if ad and ad.active %}
     <div class="container mt-5">
         <div class="ad-banner p-4 text-center">
