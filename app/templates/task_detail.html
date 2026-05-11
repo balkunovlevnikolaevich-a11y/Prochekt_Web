@@ -5,7 +5,7 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <h2>{{ task.title }}</h2>
-            <p><strong>Статус:</strong> <span class="badge bg-primary">{{ task.status.value }}</span></p>
+            <p><strong>Статус:</strong> <span class="badge bg-{{ 'success' if task.status.value == 'Принята' else 'primary' }}">{{ task.status.value }}</span></p>
             <p><strong>Награда:</strong> {{ task.reward }} ₽</p>
             <p><strong>Заказчик:</strong> {{ task.customer.username if task.customer else 'Неизвестно' }}</p>
             {% if task.executor %}
@@ -19,7 +19,7 @@
             </a>
             {% endif %}
 
-            <!-- Кнопка поддержки (теперь надёжная форма) -->
+            <!-- Кнопка Обратиться в поддержку -->
             <form method="POST" action="{{ url_for('tasks.send_message', task_id=task.id) }}">
                 <input type="hidden" name="text" value="Обращение в поддержку по задаче №{{ task.id }} — нужна помощь!">
                 <button type="submit" class="btn btn-info w-100 mb-4">
@@ -27,15 +27,15 @@
                 </button>
             </form>
 
-            <!-- Чат -->
+            <!-- ЧАТ (адаптирован под тёмную тему) -->
             <div class="card">
                 <div class="card-header">
                     <h5>💬 Чат по задаче</h5>
                 </div>
-                <div class="card-body" style="max-height: 450px; overflow-y: auto; background: #f8f9fa;">
+                <div class="card-body" style="max-height: 450px; overflow-y: auto; background: #1e1e1e; color: #e0e0e0;">
                     {% for msg in messages %}
                     <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
-                        <div class="{% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light text-dark{% endif %} rounded-3 p-3" style="max-width: 75%;">
+                        <div class="{% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-secondary text-light{% endif %} rounded-3 p-3" style="max-width: 75%;">
                             <small class="opacity-75">
                                 <strong>{{ msg.sender.username }}</strong> • {{ msg.created_at.strftime('%H:%M') }}
                             </small>
@@ -46,7 +46,7 @@
                     <p class="text-center text-muted py-4">Пока сообщений нет.<br>Напишите первым!</p>
                     {% endfor %}
                 </div>
-                <div class="card-footer">
+                <div class="card-footer bg-dark">
                     <form method="POST" action="{{ url_for('tasks.send_message', task_id=task.id) }}">
                         <div class="input-group">
                             <input type="text" name="text" class="form-control" placeholder="Напишите сообщение..." required>
@@ -54,6 +54,20 @@
                         </div>
                     </form>
                 </div>
+            </div>
+
+            <!-- Кнопки действий -->
+            <div class="mt-4">
+                {% if current_user.id == task.executor_id and task.status.value == 'Принята' %}
+                    <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning btn-lg w-100">
+                        Отметить как выполненную
+                    </a>
+                {% endif %}
+                {% if current_user.id == task.customer_id and task.status.value == 'Выполнена' %}
+                    <a href="{{ url_for('tasks.confirm_task', task_id=task.id) }}" class="btn btn-success btn-lg w-100">
+                        ✅ Подтвердить выполнение и выплатить награду
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
