@@ -12,23 +12,27 @@
             <p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>
             {% endif %}
 
+            <!-- Кнопка взять задачу -->
             {% if task.status.value == 'Открыта' %}
-            <a href="{{ url_for('tasks.take_task', task_id=task.id) }}" class="btn btn-success btn-lg w-100 mb-4">
+            <a href="{{ url_for('tasks.take_task', task_id=task.id) }}" class="btn btn-success btn-lg w-100 mb-3">
                 ✅ Взять задачу в работу
             </a>
             {% endif %}
 
-            <!-- Кнопка поддержки -->
-            <button onclick="sendSupportRequest()" class="btn btn-info w-100 mb-4">
-                📞 Обратиться в поддержку
-            </button>
+            <!-- Кнопка поддержки (теперь надёжная форма) -->
+            <form method="POST" action="{{ url_for('tasks.send_message', task_id=task.id) }}">
+                <input type="hidden" name="text" value="Обращение в поддержку по задаче №{{ task.id }} — нужна помощь!">
+                <button type="submit" class="btn btn-info w-100 mb-4">
+                    📞 Обратиться в поддержку
+                </button>
+            </form>
 
-            <!-- ЧАТ -->
-            <div class="card mt-3">
-                <div class="card-header bg-light">
+            <!-- Чат -->
+            <div class="card">
+                <div class="card-header">
                     <h5>💬 Чат по задаче</h5>
                 </div>
-                <div class="card-body chat-body" style="max-height: 450px; overflow-y: auto; background: #f8f9fa;">
+                <div class="card-body" style="max-height: 450px; overflow-y: auto; background: #f8f9fa;">
                     {% for msg in messages %}
                     <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
                         <div class="{% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light text-dark{% endif %} rounded-3 p-3" style="max-width: 75%;">
@@ -54,18 +58,5 @@
         </div>
     </div>
 </div>
-
-<script>
-function sendSupportRequest() {
-    if (!confirm('Отправить обращение в поддержку?')) return;
-
-    fetch("{{ url_for('tasks.send_message', task_id=task.id) }}", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: "text=Обращение в поддержку по задаче №" + {{ task.id }}
-    })
-    .then(() => location.reload());
-}
-</script>
 
 {% endblock %}
