@@ -5,10 +5,9 @@
     <div class="card shadow-sm">
         <div class="card-body">
             <h2>{{ task.title }}</h2>
+            
             <p><strong>Статус:</strong> 
-                <span class="badge bg-{{ 'success' if task.status.value == 'Принята' else 'primary' if task.status.value == 'Открыта' else 'warning' }}">
-                    {{ task.status.value }}
-                </span>
+                <span class="badge bg-primary">{{ task.status.value }}</span>
             </p>
             <p><strong>Награда:</strong> {{ task.reward }} ₽</p>
             <p><strong>Заказчик:</strong> {{ task.customer.username if task.customer else 'Неизвестно' }}</p>
@@ -16,10 +15,10 @@
             <p><strong>Исполнитель:</strong> {{ task.executor.username }}</p>
             {% endif %}
 
-            <!-- Кнопка "Взять задачу" — теперь всегда видно, когда нужно -->
-            {% if task.status.value == 'Открыта' and current_user.is_authenticated and current_user.id != task.customer_id %}
+            <!-- === КНОПКА ВЗЯТЬ ЗАДАЧУ (упрощённое условие) === -->
+            {% if task.status.value == 'Открыта' %}
             <a href="{{ url_for('tasks.take_task', task_id=task.id) }}" 
-               class="btn btn-success btn-lg w-100 mb-3">
+               class="btn btn-success btn-lg w-100 mb-4">
                 ✅ Взять задачу в работу
             </a>
             {% endif %}
@@ -31,16 +30,14 @@
 
             <!-- Чат -->
             <div class="card mt-3">
-                <div class="card-header">
+                <div class="card-header bg-light">
                     <h5>💬 Чат по задаче</h5>
                 </div>
                 <div class="card-body" style="max-height: 400px; overflow-y: auto; background: #f8f9fa;">
                     {% for msg in messages %}
                     <div class="d-flex mb-3 {% if msg.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
                         <div class="{% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %} rounded-3 p-3" style="max-width: 75%;">
-                            <small class="opacity-75">
-                                <strong>{{ msg.sender.username }}</strong> • {{ msg.created_at.strftime('%H:%M') }}
-                            </small>
+                            <small><strong>{{ msg.sender.username }}</strong> • {{ msg.created_at.strftime('%H:%M') }}</small>
                             <p class="mb-1">{{ msg.text }}</p>
                         </div>
                     </div>
@@ -58,17 +55,13 @@
                 </div>
             </div>
 
-            <!-- Кнопки действий для исполнителя и заказчика -->
+            <!-- Дополнительные кнопки действий -->
             <div class="mt-4">
                 {% if current_user.id == task.executor_id and task.status.value == 'Принята' %}
-                    <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning btn-lg w-100">
-                        Отметить как выполненную
-                    </a>
+                    <a href="{{ url_for('tasks.complete_task', task_id=task.id) }}" class="btn btn-warning btn-lg w-100">Отметить как выполненную</a>
                 {% endif %}
                 {% if current_user.id == task.customer_id and task.status.value == 'Выполнена' %}
-                    <a href="{{ url_for('tasks.confirm_task', task_id=task.id) }}" class="btn btn-success btn-lg w-100">
-                        ✅ Подтвердить выполнение и выплатить
-                    </a>
+                    <a href="{{ url_for('tasks.confirm_task', task_id=task.id) }}" class="btn btn-success btn-lg w-100">✅ Подтвердить выполнение</a>
                 {% endif %}
             </div>
         </div>
