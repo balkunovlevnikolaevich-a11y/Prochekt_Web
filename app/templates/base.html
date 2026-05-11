@@ -20,13 +20,14 @@
             transition: transform 0.3s;
             color: #fff;
         }
-        .theme-switch:hover { 
-            transform: rotate(30deg); 
+        .theme-switch:hover {
+            transform: rotate(30deg);
             color: #ffc107;
         }
     </style>
 </head>
 <body>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
@@ -50,7 +51,7 @@
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Войти</a></li>
                     {% endif %}
                     
-                    <!-- ИКОНКА СМЕНЫ ТЕМЫ (большая и заметная) -->
+                    <!-- ИКОНКА СМЕНЫ ТЕМЫ -->
                     <li class="nav-item ms-3">
                         <i onclick="toggleTheme()" class="bi bi-sun-fill theme-switch" id="theme-icon" title="Сменить тему"></i>
                     </li>
