@@ -15,14 +15,24 @@
             border-radius: 10px;
         }
         .theme-switch {
-            font-size: 1.8rem;
+            font-size: 1.9rem;
             cursor: pointer;
             transition: transform 0.3s;
+            color: #fff;
         }
-        .theme-switch:hover { transform: rotate(30deg); }
+        .theme-switch:hover { 
+            transform: rotate(30deg); 
+            color: #ffc107;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Тестовый баннер (можно потом удалить) -->
+    <h1 style="background: red; color: white; text-align: center; padding: 15px; margin: 0; font-size: 1.3rem;">
+        ✅ base.html используется
+    </h1>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
@@ -38,14 +48,15 @@
                     <li class="nav-item"><a class="nav-link admin-link" href="{{ url_for('tasks.admin_panel') }}">👑 Админ-панель</a></li>
                     {% endif %}
                 </ul>
-                <ul class="navbar-nav">
+                <ul class="navbar-nav align-items-center">
                     {% if current_user.is_authenticated %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Кабинет</a></li>
                         <li class="nav-item"><a class="nav-link text-danger" href="{{ url_for('auth.logout') }}">Выйти</a></li>
                     {% else %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Войти</a></li>
                     {% endif %}
-                    <!-- === ИКОНКА СМЕНЫ ТЕМЫ === -->
+                    
+                    <!-- ИКОНКА СМЕНЫ ТЕМЫ (большая и заметная) -->
                     <li class="nav-item ms-3">
                         <i onclick="toggleTheme()" class="bi bi-sun-fill theme-switch" id="theme-icon" title="Сменить тему"></i>
                     </li>
